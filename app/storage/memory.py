@@ -52,3 +52,39 @@ tasks_db: List[TaskRetrieve] = [
 
 # Next ID for auto-increment
 next_id = 6
+
+users_db = [
+    {
+        "id": 1,
+        "username": "alice",
+        "password": "alice123",
+        "created_at": datetime(2024, 1, 10, 9, 30)
+    },
+    {
+        "id": 2,
+        "username": "bob",
+        "password": "bob123",
+        "created_at": datetime(2024, 1, 12, 11, 15)
+    },
+    {
+        "id": 3,
+        "username": "charlie",
+        "password": "charlie123",
+        "created_at": datetime(2024, 1, 15, 14, 45)
+    },
+    {
+        "id": 4,
+        "username": "diana",
+        "password": "diana123",
+        "created_at": datetime(2024, 1, 18, 10, 5)
+    },
+    {
+        "id": 5,
+        "username": "eve",
+        "password": "eve123",
+        "created_at": datetime(2024, 1, 20, 16, 20)
+    }
+]
+
+
+next_user_id = 6
