@@ -3,11 +3,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List
 
 from app.schema.user import UserCreate, UserRetrieve, UserUpdate
-from app.db.deps import get_db
+from app.db.deps import get_current_user, get_db
 from app.service.user_service import UserService
 
-userrouter = APIRouter(prefix="/users", tags=["Users"])
-
+userrouter = APIRouter(prefix="/users", tags=["Users"],dependencies=[Depends(get_current_user)])
 
 @userrouter.post(
     "/",

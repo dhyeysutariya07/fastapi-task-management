@@ -19,6 +19,7 @@ class TaskCreate(BaseModel):
         gt=0,
         description="Estimated hours to complete the task"
     )
+    owner_id:int
 
 
 
@@ -37,6 +38,8 @@ class TaskUpdate(BaseModel):
         None,
         ge=0
     )
+    owner_id:int
+
 
     @model_validator(mode="after")
     def at_least_one_field(cls, values):
@@ -49,6 +52,7 @@ class TaskRetrieve(BaseModel):
     id: int
     title: str
     priority: str
+    owner_id:int
     estimated_hours: float
     actual_hours: Optional[float]
     created_at: datetime

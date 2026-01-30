@@ -15,7 +15,7 @@ class TaskRepository:
     @staticmethod
     async def list_by_user(db: AsyncSession, user_id: int) -> list[Task]:
         result = await db.execute(
-            select(Task).where(Task.user_id == user_id)
+            select(Task).where(Task.owner_id == user_id)
         )
         return result.scalars().all()
 
