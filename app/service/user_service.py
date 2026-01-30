@@ -43,24 +43,20 @@ class UserService:
     async def update_user(
         db: AsyncSession,
         user_id: int,
-        user_in: UserUpdate
+        payload: UserUpdate
     ) -> User:
 
-        user = await UserRepository.get_by_id(db, user_id)
+        user = await UserRepository.get_by_id(db,user_id)
         if not user:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="User not found"
             )
 
-        if user_in.username is not None:
-            user.username = user_in.username
-
-        if user_in.password is not None:
-            user.password = hash_password(user_in.password)
-
-        return await UserRepository.update(db, user)
-
+        updates = payload.model_dump(exclude_unset=True)
+        return await UserRepository.update(db,user,updates)
+    
+    
     @staticmethod
     async def delete_user(db: AsyncSession, user_id: int) -> None:
         user = await UserRepository.get_by_id(db, user_id)

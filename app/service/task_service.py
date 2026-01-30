@@ -1,53 +1,58 @@
-from app.schema.task import TaskCreate, TaskRetrieve, TaskUpdate
-from app.storage.memory import tasks_db,next_id
-from datetime import datetime
+from app.models.task import Task
+from app.schema.task import TaskCreate,TaskUpdate
+from sqlalchemy.ext.asyncio import AsyncSession
+from app.repositories.task import TaskRepository
+from typing import List
 from fastapi.exceptions import HTTPException
 from fastapi import status
 
-async def create_task(task:TaskCreate):
-    global next_id
-    new_task = TaskRetrieve(
-    id=next_id,
-    title=task.title,
-    priority=task.priority,
-    estimated_hours=task.estimated_hours,
-    actual_hours=None,
-    created_at=datetime.now(),
-    updated_at=datetime.now()
-    )
 
+class TaskService:
+    @staticmethod
+    async def create(db:AsyncSession,task:TaskCreate)->Task:
+        task_to_create = Task(
+            title = task.title,
+            priority = task.priority,
+            estimated_hours = task.estimated_hours
+        )
 
-    tasks_db.append(new_task)
-    next_id+=1
+        task =await TaskRepository.create(db,task_to_create)
+        return task
 
-    return new_task
+    @staticmethod
+    async def get(db:AsyncSession,task_id:int)->Task:
+        task = await TaskRepository.get_task(db,task_id)
+        if not task:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="Task not found")
+        return task
+    
+    @staticmethod
+    async def get_all(db:AsyncSession)->List[Task]:
+        return await TaskRepository.get_all(db)
+    
+    @staticmethod
+    async def update(
+        db: AsyncSession,
+        task_id: int,
+        payload: TaskUpdate) -> Task:
 
-async def get_all_tasks():
-    return tasks_db
+        task = await TaskRepository.get_task(db, task_id)
+        if not task:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Task not found"
+            )
 
-async def get_task(task_id:int)->TaskRetrieve:
-    for task in tasks_db:
-        if task.id == task_id:
-            return task
+        updates = payload.model_dump(exclude_unset=True)
+
+        return await TaskRepository.update_task(db, task, updates)
+    
+    @staticmethod
+    async def delete(db:AsyncSession,task_id:int)->None:
+        task = await TaskRepository.get_task(db,task_id)
+        if task is None:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="Task not found")
         
-    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="Resource Not Found")
+        await TaskRepository.delete_task(db,task)
 
-async def update_task(task_id:int,task:TaskUpdate):
-    task_to_update = await get_task(task_id)
-    if task.title is not None:
-        task_to_update.title = task.title
-    if task.priority is not None:
-        task_to_update.priority = task.priority
-    if task.estimated_hours is not None:
-        task_to_update.estimated_hours = task.estimated_hours
-    if task.actual_hours is not None:
-        task_to_update.actual_hours = task.actual_hours
-
-    task_to_update.updated_at = datetime.now()
-
-    return task_to_update
-
-async def delete_task(task_id:int):
-    task_to_delete = await get_task(task_id)
-    tasks_db.remove(task_to_delete)
-    return task_to_delete
+        

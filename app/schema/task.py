@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 from typing import Optional, Literal
 from datetime import datetime
 
@@ -53,3 +53,5 @@ class TaskRetrieve(BaseModel):
     actual_hours: Optional[float]
     created_at: datetime
     updated_at: datetime
+
+    model_config = ConfigDict(from_attributes=True) # this data might come from ORM objects, not dicts.

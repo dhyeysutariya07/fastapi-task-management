@@ -35,8 +35,9 @@ class UserRepository:
         return result.scalar_one_or_none()
     
     @staticmethod
-    async def update(db:AsyncSession,user:User)->User:
-        db.add(user)
+    async def update(db:AsyncSession,user:User,updates:dict)->User:
+        for field,value in updates:
+            setattr(user,field,value)
         await db.commit()
         await db.refresh(user)
 
